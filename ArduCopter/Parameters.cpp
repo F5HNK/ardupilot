@@ -264,6 +264,27 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Advanced
     GSCALAR(land_repositioning, "LAND_REPOSITION",     LAND_REPOSITION_DEFAULT),
 
+    // @Param: LAND_DET_TASA
+    // @DisplayName: Land detector TASA option
+    // @Description: Enables TASA land detection mode
+    // @Values: 0:Standard, 1:TASA mode (for large copter frames: faster land complete based on rngfnd)
+    // @User: Advanced
+    GSCALAR(land_detector_tasa, "LAND_DET_TASA", LAND_DETECTOR_TASA_DEFAULT),
+ 
+    // @Param: LAND_TASA_MOT
+    // @DisplayName: Land detector TASA motor low 
+    // @Description: If TASA mode is enabled, standard Mot_at_lower_limit is replaced by this parameter
+    // @Range: 0 0.20
+    // @User: Advanced
+    GSCALAR(land_detector_tasa_mot_low, "LAND_TASA_MOT", LAND_DETECTOR_TASA_MOT_LOW_DEFAULT),
+
+    // @Param: LAND_TASA_MARG
+    // @DisplayName: Land detector height above ground margin
+    // @Description: If TASA mode is enabled, land detector uses this height over ground margin
+    // @Range: 0 0.50
+    // @User: Advanced
+    GSCALAR(land_tasa_gnd_margin, "LAND_TASA_MARG", LAND_TASA_GND_MARGIN_DEFAULT),
+
     // @Param: FS_EKF_ACTION
     // @DisplayName: EKF Failsafe Action
     // @Description: Controls the action that will be taken when an EKF failsafe is invoked

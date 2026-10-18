@@ -99,10 +99,20 @@ void Copter::update_land_detector()
             throttle_mix_at_min = true;
         }
 #endif
+
+        bool land_tasa_mode = (g.land_detector_tasa) && (rangefinder_state.enabled);  // only if TASA mode parameter enabled AND down rangefinder active
+
+        SET_LOG_FLAG(land_tasa_mode, LandDetectorLoggingFlag::LAND_TASA_MODE);
+
+        if (land_tasa_mode) {                // the TASA mode overrides land_trigger seconds for faster land completion decision
+            land_trigger_sec = LAND_TASA_DETECTOR_TRIGGER_SEC;
+        }
+
         SET_LOG_FLAG(motor_at_lower_limit, LandDetectorLoggingFlag::MOTOR_AT_LOWER_LIMIT);
         SET_LOG_FLAG(throttle_mix_at_min, LandDetectorLoggingFlag::THROTTLE_MIX_AT_MIN);
 
         uint8_t land_detector_scalar = 1;
+
 #if AP_LANDINGGEAR_ENABLED
         if (landinggear.get_wow_state() != AP_LandingGear::LG_WOW_UNKNOWN) {
             // we have a WoW sensor so lets loosen the strictness of the landing detector
@@ -142,16 +152,46 @@ void Copter::update_land_detector()
 #endif
         SET_LOG_FLAG(WoW_check, LandDetectorLoggingFlag::WOW);
 
-        if (motor_at_lower_limit && throttle_mix_at_min && !large_angle_request && !large_angle_error && accel_stationary && descent_rate_low && rangefinder_check && WoW_check) {
-            // landed criteria met - increment the counter and check if we've triggered
-            if( land_detector_count < land_trigger_sec*scheduler.get_loop_rate_hz()) {
-                land_detector_count++;
+        // grabs the meaningful information for TASA land detector mode
+        
+        float mot_throttle = motors->get_throttle_out();          // current FCout throttle value
+        const bool land_mot_low = mot_throttle < g.land_detector_tasa_mot_low;    // is TASA motor low ?
+
+        SET_LOG_FLAG(land_tasa_mode && land_mot_low, LandDetectorLoggingFlag::LAND_MOTOR_LOW);
+
+        // gets ground clearance in meters for TASA land detector mode
+        float height_m = rangefinder_state.alt_m_filt.get();      // distance to ground in meters
+        float gnd_clear_m = rangefinder.ground_clearance_orient(ROTATION_PITCH_270);
+        float tasa_trigger_height_m = gnd_clear_m + g.land_tasa_gnd_margin;
+        const bool height_gnd_close = rangefinder_alt_ok() && (height_m > 0.0f) && (height_m < tasa_trigger_height_m);   // is TASA distance close to ground  ?  
+
+        SET_LOG_FLAG(land_tasa_mode && height_gnd_close, LandDetectorLoggingFlag::HEIGHT_GND_CLOSE);
+
+        if (!land_tasa_mode) {     // standard land detector mode
+            if (motor_at_lower_limit && throttle_mix_at_min && !large_angle_request && !large_angle_error && accel_stationary && descent_rate_low && rangefinder_check && WoW_check) {
+                // landed criteria met - increment the counter and check if we've triggered
+                if( land_detector_count < land_trigger_sec*scheduler.get_loop_rate_hz()) {
+                    land_detector_count++;
+                } else {
+                    set_land_complete(true);
+                }
             } else {
-                set_land_complete(true);
+                // we've sensed movement up or down so reset land_detector
+                land_detector_count = 0;
             }
-        } else {
-            // we've sensed movement up or down so reset land_detector
-            land_detector_count = 0;
+        }
+        else {     // TASA land detector mode
+            if (land_mot_low && throttle_mix_at_min && !large_angle_request && !large_angle_error && height_gnd_close && descent_rate_low && WoW_check) {
+                // landed criteria met - increment the counter and check if we've triggered
+                if( land_detector_count < land_trigger_sec*scheduler.get_loop_rate_hz()) {
+                    land_detector_count++;
+                } else {
+                    set_land_complete(true);
+                }
+            } else {
+                // we've sensed movement up or down so reset land_detector
+                land_detector_count = 0;
+            }
         }
     }
 

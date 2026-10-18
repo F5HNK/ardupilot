@@ -387,9 +387,14 @@ public:
         k_param_throw_altitude_descend,
         k_param_throw_altitude_ascend,
 
+        k_param_land_detector_tasa,         // if 1, enables TASA land detector mode
+        k_param_land_detector_tasa_mot_low, // in TASA landing mode, this parameter replaces Mot_at_lower_limit
+        k_param_land_tasa_gnd_margin,             // height over ground margin to trigger land detector
+
         // the k_param_* space is 9-bits in size
         // 511: reserved
     };
+
 
     AP_Int16        format_version;
 
@@ -447,6 +452,11 @@ public:
     AP_Float        fs_ekf_thresh;
     AP_Int16        gcs_pid_mask;
 
+    AP_Int8         land_detector_tasa;
+    AP_Float        land_detector_tasa_mot_low;
+    AP_Float        land_tasa_gnd_margin;            
+
+
 #if MODE_THROW_ENABLED
     AP_Enum<ModeThrow::PreThrowMotorState>         throw_motor_start;
     AP_Int16         throw_altitude_min; // minimum altitude in m above which a throw can be detected
@@ -455,6 +465,7 @@ public:
     AP_Float         throw_altitude_descend;    // target altitude (meters) to descend during a drop, (must be positive)
     AP_Float         throw_altitude_ascend;     // target altitude (meters) to ascend during a throw upwards, (must be positive)
 #endif
+
 
     AP_Int16                rc_speed; // speed of fast RC Channels in Hz
 

@@ -870,6 +870,9 @@ private:
         LARGE_ANGLE_REQUEST  = 1U <<  8,
         MOTOR_AT_LOWER_LIMIT = 1U <<  9,
         THROTTLE_MIX_AT_MIN  = 1U << 10,
+        LAND_MOTOR_LOW       = 1U << 11,
+        HEIGHT_GND_CLOSE     = 1U << 12,
+        LAND_TASA_MODE       = 1U << 13,
     };
     struct {
         uint32_t last_logged_ms;
