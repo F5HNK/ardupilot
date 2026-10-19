@@ -857,6 +857,7 @@ private:
     void update_throttle_mix();
     bool get_force_flying() const;
 #if HAL_LOGGING_ENABLED
+// last 3 bits added for TASA specific landing mode
     enum class LandDetectorLoggingFlag : uint16_t {
         LANDED               = 1U <<  0,
         LANDED_MAYBE         = 1U <<  1,
@@ -879,6 +880,8 @@ private:
         uint32_t last_logged_count;
         uint16_t last_logged_flags;
     } land_detector;
+
+    // last 3 boleans added for TASA specific landing mode
     void Log_LDET(uint16_t logging_flags, uint32_t land_detector_count);
 #endif
 

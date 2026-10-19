@@ -349,7 +349,7 @@
  # define LAND_AIRMODE_DETECTOR_TRIGGER_SEC 3.0f    // number of seconds to detect a landing in air mode
 #endif
 #ifndef LAND_TASA_DETECTOR_TRIGGER_SEC
- # define LAND_TASA_DETECTOR_TRIGGER_SEC 0.2f    // number of seconds to detect a landing in TASA mode
+ # define LAND_TASA_DETECTOR_TRIGGER_SEC    0.2f    // number of seconds to detect a landing in TASA mode
 #endif
 #ifndef LAND_DETECTOR_MAYBE_TRIGGER_SEC
  # define LAND_DETECTOR_MAYBE_TRIGGER_SEC   0.2f    // number of seconds that means we might be landed (used to reset horizontal position targets to prevent tipping over)
@@ -361,7 +361,7 @@
 # define LAND_DETECTOR_ACCEL_MAX            1.0f    // vehicle acceleration must be under 1m/s/s
 #endif
 #ifndef LAND_DETECTOR_VEL_Z_MAX
-# define LAND_DETECTOR_VEL_Z_MAX              1.0f    // vehicle vertical velocity must be under 1m/s
+# define LAND_DETECTOR_VEL_Z_MAX             1.0f    // vehicle vertical velocity must be under 1m/s
 #endif
 
 #ifndef LAND_DETECTOR_TASA_DEFAULT
@@ -371,7 +371,7 @@
 # define LAND_DETECTOR_TASA_MOT_LOW_DEFAULT       0.1f // in TASA landing mode, this parameter replaces Mot_at_lower_limit
 #endif
 #ifndef LAND_TASA_GND_MARGIN_DEFAULT
-# define LAND_TASA_GND_MARGIN_DEFAULT             0.0f   // land close margin to trigger land detector above ground
+# define LAND_TASA_GND_MARGIN_DEFAULT             0.2f   // land close margin to trigger land detector above ground
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

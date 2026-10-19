@@ -204,6 +204,9 @@ void Copter::update_land_detector()
 // @Field: Flags: boolean state flags
 // @FieldBitmaskEnum: Flags: Copter::LandDetectorLoggingFlag
 // @Field: Count: landing_detector pass count
+// @Field: MotLow: TASA motor throttle below configured threshold (0 or 1)
+// @Field: HgtClose: TASA rangefinder within landing threshold (0 or 1)
+// @Field: TasaMode: TASA landing detector active (0 or 1)
     SET_LOG_FLAG(ap.land_complete, LandDetectorLoggingFlag::LANDED);
     SET_LOG_FLAG(ap.land_complete_maybe, LandDetectorLoggingFlag::LANDED_MAYBE);
     SET_LOG_FLAG(standby_active, LandDetectorLoggingFlag::STANDBY_ACTIVE);
@@ -230,15 +233,23 @@ void Copter::Log_LDET(uint16_t logging_flags, uint32_t detector_count)
     land_detector.last_logged_flags = logging_flags;
     land_detector.last_logged_ms = now;
 
+    // Expose TASA flag bits as independent scalar fields for easy Mission Planner plotting.
+    const uint8_t mot_low = (logging_flags & uint16_t(LandDetectorLoggingFlag::LAND_MOTOR_LOW)) != 0;
+    const uint8_t height_close = (logging_flags & uint16_t(LandDetectorLoggingFlag::HEIGHT_GND_CLOSE)) != 0;
+    const uint8_t tasa_mode = (logging_flags & uint16_t(LandDetectorLoggingFlag::LAND_TASA_MODE)) != 0;
+
     AP::logger().WriteStreaming(
         "LDET",
-        "TimeUS," "Flags," "Count",
-        "s"       "-"      "-",
-        "F"       "-"      "-",
-        "Q"       "H"      "I",
+        "TimeUS,Flags,Count,MotLow,HgtClose,TasaMode",
+        "s-----",
+        "F-----",
+        "QHIBBB",
         AP_HAL::micros64(),
         logging_flags,
-        land_detector_count
+        detector_count,
+        mot_low,
+        height_close,
+        tasa_mode
     );
 }
 #endif

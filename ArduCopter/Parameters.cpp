@@ -280,7 +280,7 @@ const AP_Param::Info Copter::var_info[] = {
 
     // @Param: LAND_TASA_MARG
     // @DisplayName: Land detector height above ground margin
-    // @Description: If TASA mode is enabled, land detector uses this height over ground margin
+    // @Description: If TASA mode is enabled, land detector uses this margin over ground clear value
     // @Range: 0 0.50
     // @User: Advanced
     GSCALAR(land_tasa_gnd_margin, "LAND_TASA_MARG", LAND_TASA_GND_MARGIN_DEFAULT),
