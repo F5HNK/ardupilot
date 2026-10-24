@@ -36,13 +36,20 @@ The standard ArduCopter landing detector combines several conditions, including 
 
 These conditions must remain satisfied for a confirmation period before the aircraft is declared landed.
 
-On the TASA airframe, the `accel_stationary` condition can be particularly unreliable because of the vibrations and oscillations described above.
+On the TASA airframe, two conditions can be particularly restrictive: `accel_stationary` may be disturbed by structural vibration and oscillation, while `motor_at_lower_limit` may not remain asserted when the attitude controller continues making thrust corrections after ground contact.
 
 ## TASA landing detector modifications
 
-The principal modification replaces the standard `accel_stationary` condition with a **ground-proximity condition derived from a downward-facing LiDAR rangefinder**.
+The TASA detector deliberately substitutes **two** standard landing criteria:
 
-The other relevant landing conditions, including low motor output, low descent rate, attitude constraints, and weight-on-wheels checks where applicable, are retained.
+| Standard criterion | TASA criterion | Rationale |
+| --- | --- | --- |
+| `accel_stationary` | `height_gnd_close` | Uses valid downward-rangefinder ground proximity instead of accelerometer stationarity, which may be unreliable on a vibrating, flexible airframe. The threshold is configurable using `RNGFNDx_GNDCLR` plus `LAND_TASA_MARG`. |
+| `motor_at_lower_limit` (`motors->limit.throttle_lower`) | `land_mot_low` | Uses a configurable low collective-throttle-output threshold (`LAND_TASA_MOT`) rather than requiring the motor mixer to assert its lower-limit flag. |
+
+These are not direct touchdown sensors: they are permissive conditions that must be satisfied **together** with the retained checks (`throttle_mix_at_min`, no large angle request or error, low descent rate, and weight-on-wheels where applicable). The rangefinder must also report a valid, positive measurement below the proximity threshold.
+
+The motor-limit substitution is motivated by the TASA airframe: contact on uneven ground may provoke continued attitude corrections, so the standard lower-limit flag may be delayed or intermittent even when collective throttle is already low. This is an engineering hypothesis consistent with mock-up logs, not yet a demonstrated full-size-flight result.
 
 The modifications are implemented in a custom branch based on ArduCopter 4.7.2.
 
@@ -69,11 +76,13 @@ The margin must be selected carefully: an excessive value could allow landing co
 
 **`LAND_TASA_MOT`**
 
-Normalized motor throttle-output threshold used by the TASA landing detector.
+**Configurable low collective-throttle threshold** used instead of the standard `motor_at_lower_limit` (`motors->limit.throttle_lower`) condition.
 
-The motor-output condition is satisfied when `motors->get_throttle_out()` falls below this parameter.
+The TASA condition is satisfied when `motors->get_throttle_out() < LAND_TASA_MOT`. This is a comparison against the normalized **collective throttle command**, not a requirement for the motor mixer to hit its lower limit. It does **not** measure individual motor RPM, actual thrust, or motor PWM, and is distinct from `MOT_SPIN_MIN`.
 
-This parameter does not represent measured motor RPM.
+On a large multirotor with substantial propeller inertia and a flexible or uneven landing structure, the controller may continue issuing attitude corrections after contact. A configurable collective-throttle threshold can allow the detector to accumulate its confirmation count without waiting for `motors->limit.throttle_lower` to become true.
+
+**Safety:** Increasing `LAND_TASA_MOT` makes the criterion easier to satisfy, potentially including low-throttle flight close to the ground. Tune conservatively, in combination with the rangefinder margin and confirmation time; neither low throttle nor ground proximity alone proves touchdown.
 
 ### LiDAR requirements
 
@@ -133,7 +142,7 @@ The modified landing detector has been compiled successfully for both the Pixhaw
 
 Initial flight tests have been performed on a smaller TASA mock-up equipped with a downward-facing TFmini Plus LiDAR.
 
-These tests included gentle touchdowns and faster landings involving ground contact and bouncing. Landing detection completed successfully in the observed tests. The extended `LDET` fields were also verified in recorded flight logs.
+These tests included gentle touchdowns and faster landings involving ground contact and bouncing. Landing detection completed successfully in the observed tests. In the latest tilted-autoland mock-up log, the configurable `MotLow` condition became true before the standard `MOTOR_AT_LOWER_LIMIT` flag, supporting the distinction between the two criteria without proving how the full-size TASA will behave. The extended `LDET` fields were also verified in recorded flight logs.
 
 **The modified detector has not yet been flight-validated on the full-size TASA octocopter.**
 
