@@ -102,7 +102,7 @@ const AP_Param::Info Copter::var_info[] = {
 
     // @Param: GPS_HDOP_GOOD
     // @DisplayName: GPS Hdop Good
-    // @Description: GPS Hdop value at or below this value represent a good position.  Used for pre-arm checks
+    // @Description: GPS Hdop value at or below this value represent a  position.  Used for pre-arm checks
     // @Range: 100 900
     // @User: Advanced
     GSCALAR(gps_hdop_good, "GPS_HDOP_GOOD", GPS_HDOP_GOOD_DEFAULT),
@@ -267,7 +267,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Param: LAND_DET_TASA
     // @DisplayName: Land detector TASA option
     // @Description: Enables TASA land detection mode
-    // @Values: 0:Standard, 1:TASA mode (for large copter frames: faster land complete based on rngfnd)
+    // @Values: 0:Standard, 1:TASA mode
     // @User: Advanced
     GSCALAR(land_detector_tasa, "LAND_DET_TASA", LAND_DETECTOR_TASA_DEFAULT),
  
